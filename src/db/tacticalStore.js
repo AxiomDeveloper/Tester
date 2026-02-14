@@ -1,20 +1,36 @@
 import Dexie from 'dexie';
 
-export const db = new Dexie('TacticalCOP');
+export const db = new Dexie('GhostOneDB');
 
+// Define the schema (structure)
 db.version(1).stores({
-  units: '++id, sidc, lat, lng, type, timestamp', // Index for querying
-  routes: '++id, name, timestamp',
-  settings: 'key, value'
+  // &id = unique auto-incrementing ID
+  // sidc = symbol identification code (military icon)
+  // lat, lng = coordinates
+  targets: '++id, lat, lng, sidc, note, timestamp', 
+  
+  // For recording path history
+  tracks: '++id, mission_id, timestamp' 
 });
 
-// Helper to add a unit
-export const addUnit = async (sidc, lat, lng) => {
-  await db.units.add({
-    sidc,
+// Helper: Add a standard hostile target
+export const addHostile = async (lat, lng) => {
+  await db.targets.add({
     lat,
     lng,
-    type: 'friendly',
-    timestamp: new Date()
+    sidc: 'SHG-UCI----D', // Standard Hostile Infantry
+    note: 'DETECTED',
+    timestamp: Date.now()
+  });
+};
+
+// Helper: Add a friendly unit
+export const addFriendly = async (lat, lng) => {
+  await db.targets.add({
+    lat,
+    lng,
+    sidc: 'SFG-UCI----D', // Friendly Infantry
+    note: 'TEAM_ALPHA',
+    timestamp: Date.now()
   });
 };
