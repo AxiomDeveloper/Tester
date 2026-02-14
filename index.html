@@ -1,609 +1,661 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>SYSTEM ZERO // ORBITAL DEFENSE</title>
 <style>
-:root {
---color-bg: #050505;
---color-primary: #00f3ff;
---color-secondary: #ff0055;
---color-dim: #004455;
---font-stack: 'Courier New', Consolas, monospace;
+:root{
+  --color-bg:#050505;
+  --color-primary:#00f3ff;
+  --color-secondary:#ff0055;
+  --color-dim:#004455;
+  --font-stack:'Courier New',Consolas,monospace;
 }
-* { box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
-body {
-margin: 0;
-padding: 0;
-background-color: var(--color-bg);
-color: var(--color-primary);
-font-family: var(--font-stack);
-overflow: hidden;
-height: 100vh;
-width: 100vw;
-display: flex;
-flex-direction: column;
-touch-action: none; /* Prevents scroll/zoom on mobile */
+*{box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;}
+body{
+  margin:0;padding:0;background-color:var(--color-bg);color:var(--color-primary);
+  font-family:var(--font-stack);overflow:hidden;height:100vh;width:100vw;
+  display:flex;flex-direction:column;touch-action:none;
 }
-/* CRT EFFECTS /
-.scanlines {
-position: fixed;
-top: 0; left: 0; right: 0; bottom: 0;
-background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-background-size: 100% 4px, 6px 100%;
-pointer-events: none; / Click-through essential for touch */
-z-index: 100;
+/* CRT EFFECTS */
+.scanlines{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:
+    linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%),
+    linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
+  background-size:100% 4px, 6px 100%;
+  pointer-events:none;
+  z-index:100;
 }
-.vignette {
-position: fixed;
-top: 0; left: 0; right: 0; bottom: 0;
-background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,1) 100%);
-pointer-events: none;
-z-index: 101;
+.vignette{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,1) 100%);
+  pointer-events:none;
+  z-index:101;
 }
 /* LAYOUT */
-#main-ui {
-display: grid;
-grid-template-columns: 250px 1fr 250px;
-grid-template-rows: 60px 1fr 100px;
-height: 100%;
-padding: 20px;
-gap: 15px;
-opacity: 0;
-transition: opacity 1s ease-in;
+#main-ui{
+  display:grid;
+  grid-template-columns:250px 1fr 250px;
+  grid-template-rows:60px 1fr 100px;
+  height:100%;
+  padding:20px;
+  gap:15px;
+  opacity:0;
+  transition:opacity 1s ease-in;
 }
 /* SECTIONS */
-.panel {
-border: 1px solid var(--color-dim);
-background: rgba(0, 20, 30, 0.3);
-position: relative;
-display: flex;
-flex-direction: column;
-overflow: hidden;
+.panel{
+  border:1px solid var(--color-dim);
+  background:rgba(0,20,30,0.3);
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
-.panel::before {
-content: '';
-position: absolute;
-top: 0; left: 0; width: 100%; height: 2px;
-background: var(--color-primary);
-box-shadow: 0 0 10px var(--color-primary);
+.panel::before{
+  content:'';
+  position:absolute;top:0;left:0;width:100%;height:2px;
+  background:var(--color-primary);
+  box-shadow:0 0 10px var(--color-primary);
 }
-.panel-header {
-background: var(--color-dim);
-color: var(--color-bg);
-padding: 5px 10px;
-font-size: 12px;
-font-weight: bold;
-text-transform: uppercase;
-letter-spacing: 2px;
+.panel-header{
+  background:var(--color-dim);
+  color:var(--color-bg);
+  padding:5px 10px;
+  font-size:12px;
+  font-weight:bold;
+  text-transform:uppercase;
+  letter-spacing:2px;
 }
 /* HEADER */
-header {
-grid-column: 1 / -1;
-display: flex;
-justify-content: space-between;
-align-items: center;
-border-bottom: 2px solid var(--color-primary);
+header{
+  grid-column:1 / -1;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:2px solid var(--color-primary);
 }
-h1 { margin: 0; font-size: 24px; text-shadow: 0 0 10px var(--color-primary); }
-.clock { font-size: 18px; }
+h1{margin:0;font-size:24px;text-shadow:0 0 10px var(--color-primary);}
+.clock{font-size:18px;}
 /* CENTER VIEWPORT */
-#viewport {
-grid-column: 2;
-grid-row: 2;
-position: relative;
-background: #000;
-border: 1px solid var(--color-primary);
+#viewport{
+  grid-column:2;
+  grid-row:2;
+  position:relative;
+  background:#000;
+  border:1px solid var(--color-primary);
 }
-canvas { width: 100%; height: 100%; display: block; }
+canvas{width:100%;height:100%;display:block;}
 /* LOGS & SIDEBARS */
-#log-panel { grid-column: 1; grid-row: 2 / 4; font-size: 10px; overflow-y: hidden; }
-.log-entry { margin-bottom: 4px; font-family: monospace; }
-.log-entry.error { color: var(--color-secondary); }
-#data-panel { grid-column: 3; grid-row: 2; font-size: 12px; }
-.data-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed var(--color-dim); }
+#log-panel{grid-column:1;grid-row:2 / 4;font-size:10px;overflow-y:hidden;}
+.log-entry{margin-bottom:4px;font-family:monospace;}
+.log-entry.error{color:var(--color-secondary);}
+#data-panel{grid-column:3;grid-row:2;font-size:12px;}
+.data-row{display:flex;justify-content:space-between;margin-bottom:8px;border-bottom:1px dashed var(--color-dim);}
 /* FOOTER / INPUT */
-footer {
-grid-column: 2;
-grid-row: 3;
-display: flex;
-flex-direction: column;
-justify-content: flex-end;
+footer{
+  grid-column:2;
+  grid-row:3;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
 }
-#cli-container {
-border: 1px solid var(--color-primary);
-padding: 10px;
-background: rgba(0,0,0,0.8);
-font-size: 14px;
-display: flex;
+#cli-container{
+  border:1px solid var(--color-primary);
+  padding:10px;
+  background:rgba(0,0,0,0.8);
+  font-size:14px;
+  display:flex;
 }
-#cli-input {
-background: transparent;
-border: none;
-color: var(--color-primary);
-font-family: var(--font-stack);
-font-size: 14px;
-flex-grow: 1;
-outline: none;
-text-transform: uppercase;
+#cli-input{
+  background:transparent;border:none;color:var(--color-primary);
+  font-family:var(--font-stack);font-size:14px;flex-grow:1;outline:none;
+  text-transform:uppercase;
 }
 /* MOBILE CONTROLS */
-#mobile-controls {
-grid-column: 3;
-grid-row: 3;
-display: flex;
-flex-direction: column;
-gap: 5px;
+#mobile-controls{
+  grid-column:3;
+  grid-row:3;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
 }
-.touch-btn {
-background: rgba(0, 243, 255, 0.1);
-border: 1px solid var(--color-primary);
-color: var(--color-primary);
-padding: 15px;
-font-family: var(--font-stack);
-cursor: pointer;
-text-transform: uppercase;
-font-size: 12px;
-transition: all 0.1s;
-text-align: center;
+.touch-btn{
+  background:rgba(0,243,255,0.1);
+  border:1px solid var(--color-primary);
+  color:var(--color-primary);
+  padding:15px;
+  font-family:var(--font-stack);
+  cursor:pointer;
+  text-transform:uppercase;
+  font-size:12px;
+  transition:all 0.1s;
+  text-align:center;
 }
-.touch-btn:active {
-background: var(--color-primary);
-color: black;
-box-shadow: 0 0 15px var(--color-primary);
+.touch-btn:active{
+  background:var(--color-primary);
+  color:black;
+  box-shadow:0 0 15px var(--color-primary);
 }
 /* OVERLAY FOR AUDIO START */
-#init-overlay {
-position: fixed;
-top: 0; left: 0; right: 0; bottom: 0;
-background: black;
-z-index: 999;
-display: flex;
-align-items: center;
-justify-content: center;
-flex-direction: column;
+#init-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:black;z-index:999;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
 }
-#init-btn {
-border: 2px solid var(--color-primary);
-color: var(--color-primary);
-background: transparent;
-padding: 20px 40px;
-font-size: 20px;
-font-family: var(--font-stack);
-cursor: pointer;
-box-shadow: 0 0 20px var(--color-primary);
-animation: pulse 2s infinite;
+#init-btn{
+  border:2px solid var(--color-primary);
+  color:var(--color-primary);
+  background:transparent;
+  padding:20px 40px;
+  font-size:20px;
+  font-family:var(--font-stack);
+  cursor:pointer;
+  box-shadow:0 0 20px var(--color-primary);
+  animation:pulse 2s infinite;
 }
-@keyframes pulse {
-0% { box-shadow: 0 0 10px var(--color-primary); opacity: 1; }
-50% { box-shadow: 0 0 30px var(--color-primary); opacity: 0.7; }
-100% { box-shadow: 0 0 10px var(--color-primary); opacity: 1; }
+@keyframes pulse{
+  0%{box-shadow:0 0 10px var(--color-primary);opacity:1;}
+  50%{box-shadow:0 0 30px var(--color-primary);opacity:0.7;}
+  100%{box-shadow:0 0 10px var(--color-primary);opacity:1;}
 }
 /* RESPONSIVE / MOBILE IPHONE */
-@media (max-width: 800px) {
-#main-ui {
-display: flex;
-flex-direction: column;
-padding: 10px;
-gap: 10px;
-}
-header { border: none; margin-bottom: 5px; }
-h1 { font-size: 18px; }
-/* Prioritize Viewport */
-#viewport {
-height: 50vh;
-order: 2;
-flex-shrink: 0;
-}
-/* Hide Sidebar logs on small screens to save space */
-#log-panel {
-height: 80px;
-order: 4;
-}
-#data-panel { display: none; }
-footer {
-order: 3;
-height: auto;
-display: none; /* Hide keyboard input on mobile, rely on buttons */
-}
-#mobile-controls {
-order: 5;
-display: grid;
-grid-template-columns: 1fr 1fr 1fr;
-height: 60px;
-gap: 10px;
-}
-.touch-btn { font-size: 10px; padding: 0; display:flex; align-items:center; justify-content:center; }
+@media (max-width:800px){
+  #main-ui{display:flex;flex-direction:column;padding:10px;gap:10px;}
+  header{border:none;margin-bottom:5px;}
+  h1{font-size:18px;}
+  #viewport{height:50vh;order:2;flex-shrink:0;}
+  #log-panel{height:80px;order:4;}
+  #data-panel{display:none;}
+  footer{order:3;height:auto;display:none;}
+  #mobile-controls{
+    order:5;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    height:60px;
+    gap:10px;
+  }
+  .touch-btn{font-size:10px;padding:0;display:flex;align-items:center;justify-content:center;}
 }
 </style>
 </head>
 <body>
 <div class="scanlines"></div>
 <div class="vignette"></div>
+
 <div id="init-overlay">
-<button id="init-btn">INITIALIZE SYSTEM</button>
-<p style="margin-top:20px; color: #004455; font-size: 10px;">TAP TO ENGAGE NEURAL LINK</p>
+  <button id="init-btn">INITIALIZE SYSTEM</button>
+  <p style="margin-top:20px; color:#004455; font-size:10px;">TAP TO ENGAGE NEURAL LINK</p>
 </div>
+
 <div id="main-ui">
-<header>
-<h1>SYSTEM ZERO</h1>
-<div class="clock" id="clock">00:00:00</div>
-</header>
-<div id="log-panel" class="panel">
-<div class="panel-header">SYSTEM LOG</div>
-<div id="log-content" style="padding: 10px;"></div>
+  <header>
+    <h1>SYSTEM ZERO</h1>
+    <div class="clock" id="clock">00:00:00</div>
+  </header>
+
+  <div id="log-panel" class="panel">
+    <div class="panel-header">SYSTEM LOG</div>
+    <div id="log-content" style="padding:10px;"></div>
+  </div>
+
+  <div id="viewport">
+    <div class="panel-header" style="position:absolute;top:0;left:0;z-index:10;pointer-events:none;">OPTICAL SENSOR ARRAY</div>
+    <canvas id="main-canvas"></canvas>
+  </div>
+
+  <div id="data-panel" class="panel">
+    <div class="panel-header">TELEMETRY</div>
+    <div style="padding:10px;" id="telemetry-content"></div>
+  </div>
+
+  <footer>
+    <div id="cli-container">
+      <span style="margin-right:10px;">&gt;</span>
+      <input type="text" id="cli-input" placeholder="AWAITING COMMAND..." autocomplete="off" />
+    </div>
+  </footer>
+
+  <div id="mobile-controls">
+    <div class="touch-btn" id="btn-scan">SCAN SECTOR</div>
+    <div class="touch-btn" id="btn-status">STATUS RPT</div>
+    <div class="touch-btn" id="btn-override" style="color:var(--color-secondary);border-color:var(--color-secondary);">OVERRIDE</div>
+  </div>
 </div>
-<div id="viewport">
-<div class="panel-header" style="position: absolute; top:0; left:0; z-index:10; pointer-events:none;">OPTICAL SENSOR ARRAY</div>
-<canvas id="main-canvas"></canvas>
-</div>
-<div id="data-panel" class="panel">
-<div class="panel-header">TELEMETRY</div>
-<div style="padding: 10px;" id="telemetry-content"></div>
-</div>
-<footer>
-<div id="cli-container">
-<span style="margin-right: 10px;">></span>
-<input type="text" id="cli-input" placeholder="AWAITING COMMAND..." autocomplete="off">
-</div>
-</footer>
-<div id="mobile-controls">
-<div class="touch-btn" id="btn-scan">SCAN SECTOR</div>
-<div class="touch-btn" id="btn-status">STATUS RPT</div>
-<div class="touch-btn" id="btn-override" style="color:var(--color-secondary); border-color:var(--color-secondary);">OVERRIDE</div>
-</div>
-</div>
+
 <script>
 /**
- * SYSTEM ZERO CORE ENGINE v2.0
+ * SYSTEM ZERO CORE ENGINE v2.0 (fixed)
  * Touch-optimized for iOS/Android
-   */
+ */
 const CONFIG = {
-colors: {
-primary: '#00f3ff',
-secondary: '#ff0055',
-dim: '#004455',
-bg: '#050505'
-}
+  colors: {
+    primary: '#00f3ff',
+    secondary: '#ff0055',
+    dim: '#004455',
+    bg: '#050505'
+  }
 };
+
 // --- AUDIO ENGINE (Web Audio API) ---
 class SoundEngine {
-constructor() {
-this.ctx = null;
-this.masterGain = null;
-this.initialized = false;
+  constructor() {
+    this.ctx = null;
+    this.masterGain = null;
+    this.initialized = false;
+  }
+
+  async init() {
+    if (this.initialized) return;
+
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    this.ctx = new AudioContext();
+
+    this.masterGain = this.ctx.createGain();
+    this.masterGain.gain.value = 0.3;
+    this.masterGain.connect(this.ctx.destination);
+
+    this.startHum();
+    this.initialized = true;
+
+    if (this.ctx.state === 'suspended') {
+      await this.ctx.resume();
+    }
+  }
+
+  startHum() {
+    const osc1 = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc1.frequency.value = 60;
+    osc2.frequency.value = 62;
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.gain.value = 0.1;
+    gain.connect(this.masterGain);
+
+    osc1.start();
+    osc2.start();
+  }
+
+  playTone(type) {
+    if (!this.ctx) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const now = this.ctx.currentTime;
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    if (type === 'error') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(50, now + 0.5);
+      gain.gain.setValueAtTime(0.5, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.5);
+      osc.start(now);
+      osc.stop(now + 0.5);
+    } else if (type === 'scan') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, now);
+      osc.frequency.linearRampToValueAtTime(1200, now + 0.2);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.5);
+      osc.start(now);
+      osc.stop(now + 0.5);
+    } else if (type === 'click') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(2000, now);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      osc.start(now);
+      osc.stop(now + 0.05);
+    }
+  }
 }
-async init() {
-if (this.initialized) return;
-const AudioContext = window.AudioContext |
-| window.webkitAudioContext;
-this.ctx = new AudioContext();
-// Master Gain
-this.masterGain = this.ctx.createGain();
-this.masterGain.gain.value = 0.3; // Prevent clipping
-this.masterGain.connect(this.ctx.destination);
-// Start background drone
-this.startHum();
-this.initialized = true;
-// Resume if suspended (common iOS issue)
-if (this.ctx.state === 'suspended') {
-await this.ctx.resume();
-}
-}
-startHum() {
-const osc1 = this.ctx.createOscillator();
-const osc2 = this.ctx.createOscillator();
-const gain = this.ctx.createGain();
-// Binaural beat effect (60hz vs 62hz)
-osc1.frequency.value = 60;
-osc2.frequency.value = 62;
-osc1.connect(gain);
-osc2.connect(gain);
-gain.gain.value = 0.1;
-gain.connect(this.masterGain);
-osc1.start();
-osc2.start();
-}
-playTone(type) {
-if (!this.ctx) return;
-if (this.ctx.state === 'suspended') this.ctx.resume();
-const osc = this.ctx.createOscillator();
-const gain = this.ctx.createGain();
-const now = this.ctx.currentTime;
-osc.connect(gain);
-gain.connect(this.masterGain);
-if (type === 'error') {
-osc.type = 'sawtooth';
-osc.frequency.setValueAtTime(150, now);
-osc.frequency.exponentialRampToValueAtTime(50, now + 0.5);
-gain.gain.setValueAtTime(0.5, now);
-gain.gain.linearRampToValueAtTime(0, now + 0.5);
-osc.start(now);
-osc.stop(now + 0.5);
-} else if (type === 'scan') {
-osc.type = 'sine';
-osc.frequency.setValueAtTime(400, now);
-osc.frequency.linearRampToValueAtTime(1200, now + 0.2);
-gain.gain.setValueAtTime(0.3, now);
-gain.gain.linearRampToValueAtTime(0, now + 0.5);
-osc.start(now);
-osc.stop(now + 0.5);
-} else if (type === 'click') {
-osc.type = 'square';
-osc.frequency.setValueAtTime(2000, now);
-gain.gain.setValueAtTime(0.05, now);
-gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-osc.start(now);
-osc.stop(now + 0.05);
-}
-}
-}
+
 const Audio = new SoundEngine();
+
 // --- VISUAL ENGINE (Canvas) ---
 const canvas = document.getElementById('main-canvas');
 const ctx = canvas.getContext('2d');
-let width, height;
+
+let width = 0, height = 0;
+
 // State
-let stars =;
+let stars = [];
 let touchPoint = { x: 0, y: 0, active: false, radius: 0 };
 let cubeRotation = { x: 0, y: 0 };
 let lastTouch = { x: 0, y: 0 };
 let scanActive = false;
 let scanRadius = 0;
+
 function resize() {
-const dpr = window.devicePixelRatio |
-| 1;
-const rect = canvas.getBoundingClientRect();
-canvas.width = rect.width * dpr;
-canvas.height = rect.height * dpr;
-ctx.scale(dpr, dpr);
-width = rect.width;
-height = rect.height;
-// Center cube initially
-cubeRotation.x = 0;
-cubeRotation.y = 0;
-initStars();
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+
+  canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+  canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+
+  // Reset transform before scaling to avoid compounding on resize
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+
+  width = rect.width;
+  height = rect.height;
+
+  initStars();
 }
-window.addEventListener('resize', resize);
+
+window.addEventListener('resize', resize, { passive: true });
+
 // --- TOUCH & MOUSE HANDLING ---
 function handleStart(x, y) {
-touchPoint.active = true;
-touchPoint.x = x;
-touchPoint.y = y;
-touchPoint.radius = 0;
-lastTouch.x = x;
-lastTouch.y = y;
-Audio.playTone('click');
-// Unlock audio context on iOS if not yet done
-if (Audio.ctx && Audio.ctx.state === 'suspended') {
-Audio.ctx.resume();
+  touchPoint.active = true;
+  touchPoint.x = x;
+  touchPoint.y = y;
+  touchPoint.radius = 0;
+
+  lastTouch.x = x;
+  lastTouch.y = y;
+
+  Audio.playTone('click');
+
+  if (Audio.ctx && Audio.ctx.state === 'suspended') {
+    Audio.ctx.resume();
+  }
 }
-}
+
 function handleMove(x, y) {
-if (!touchPoint.active) return;
-// Calculate Delta for Cube Rotation
-const dx = x - lastTouch.x;
-const dy = y - lastTouch.y;
-cubeRotation.y += dx * 0.01;
-cubeRotation.x += dy * 0.01;
-touchPoint.x = x;
-touchPoint.y = y;
-lastTouch.x = x;
-lastTouch.y = y;
+  if (!touchPoint.active) return;
+
+  const dx = x - lastTouch.x;
+  const dy = y - lastTouch.y;
+
+  cubeRotation.y += dx * 0.01;
+  cubeRotation.x += dy * 0.01;
+
+  touchPoint.x = x;
+  touchPoint.y = y;
+
+  lastTouch.x = x;
+  lastTouch.y = y;
 }
+
 function handleEnd() {
-touchPoint.active = false;
+  touchPoint.active = false;
 }
+
 // Mouse Events
-canvas.addEventListener('mousedown', e => handleStart(e.offsetX, e.offsetY));
-canvas.addEventListener('mousemove', e => handleMove(e.offsetX, e.offsetY));
+canvas.addEventListener('mousedown', (e) => handleStart(e.offsetX, e.offsetY));
+canvas.addEventListener('mousemove', (e) => handleMove(e.offsetX, e.offsetY));
 canvas.addEventListener('mouseup', handleEnd);
 canvas.addEventListener('mouseleave', handleEnd);
+
 // Touch Events (Passive false needed to prevent scrolling)
-canvas.addEventListener('touchstart', e => {
-e.preventDefault();
-const rect = canvas.getBoundingClientRect();
-const touch = e.touches;
-handleStart(touch.clientX - rect.left, touch.clientY - rect.top);
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const t = e.touches[0];
+  if (!t) return;
+  handleStart(t.clientX - rect.left, t.clientY - rect.top);
 }, { passive: false });
-canvas.addEventListener('touchmove', e => {
-e.preventDefault(); // Stop screen moving
-const rect = canvas.getBoundingClientRect();
-const touch = e.touches;
-handleMove(touch.clientX - rect.left, touch.clientY - rect.top);
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const t = e.touches[0];
+  if (!t) return;
+  handleMove(t.clientX - rect.left, t.clientY - rect.top);
 }, { passive: false });
-canvas.addEventListener('touchend', handleEnd);
+
+canvas.addEventListener('touchend', handleEnd, { passive: true });
+canvas.addEventListener('touchcancel', handleEnd, { passive: true });
+
 // --- RENDERING ---
 function initStars() {
-stars =;
-for(let i=0; i<150; i++) {
-stars.push({
-x: Math.random() * width - width/2,
-y: Math.random() * height - height/2,
-z: Math.random() * 1000
-});
+  stars = [];
+  for (let i = 0; i < 150; i++) {
+    stars.push({
+      x: Math.random() * width - width / 2,
+      y: Math.random() * height - height / 2,
+      z: Math.random() * 1000
+    });
+  }
 }
+
+function drawGrid() {
+  ctx.strokeStyle = 'rgba(0, 243, 255, 0.1)';
+  ctx.lineWidth = 1;
+
+  const offsetX = cubeRotation.y * 50;
+  const offsetY = cubeRotation.x * 50;
+
+  for (let i = 0; i < height; i += 40) {
+    ctx.beginPath();
+    ctx.moveTo(0, i + (offsetY % 40));
+    ctx.lineTo(width, i + (offsetY % 40));
+    ctx.stroke();
+  }
+
+  for (let i = 0; i < width; i += 40) {
+    ctx.beginPath();
+    ctx.moveTo(i + (offsetX % 40), 0);
+    ctx.lineTo(i + (offsetX % 40), height);
+    ctx.stroke();
+  }
 }
-function drawGrid(time) {
-ctx.strokeStyle = 'rgba(0, 243, 255, 0.1)';
-ctx.lineWidth = 1;
-// Shift grid based on cube rotation/touch
-const offsetX = cubeRotation.y * 50;
-const offsetY = cubeRotation.x * 50;
-for(let i=0; i<height; i+=40) {
-ctx.beginPath();
-ctx.moveTo(0, i + (offsetY % 40));
-ctx.lineTo(width, i + (offsetY % 40));
-ctx.stroke();
-}
-for(let i=0; i<width; i+=40) {
-ctx.beginPath();
-ctx.moveTo(i + (offsetX % 40), 0);
-ctx.lineTo(i + (offsetX % 40), height);
-ctx.stroke();
-}
-}
+
 function drawCube() {
-const cx = width / 2;
-const cy = height / 2;
-const size = 60;
-const points = [
-{x:-1, y:-1, z:-1}, {x:1, y:-1, z:-1}, {x:1, y:1, z:-1}, {x:-1, y:1, z:-1},
-{x:-1, y:-1, z:1}, {x:1, y:-1, z:1}, {x:1, y:1, z:1}, {x:-1, y:1, z:1}
-];
-const edges = , , , , // Back
-, , , , // Front
-, , ,   // Connectors
-];
-// Rotation Matrix
-const rotX = cubeRotation.x;
-const rotY = cubeRotation.y;
-const projected = points.map(p => {
-// Rotate Y
-let x = p.x * Math.cos(rotY) - p.z * Math.sin(rotY);
-let z = p.x * Math.sin(rotY) + p.z * Math.cos(rotY);
-// Rotate X
-let y = p.y * Math.cos(rotX) - z * Math.sin(rotX);
-z = p.y * Math.sin(rotX) + z * Math.cos(rotX);
-// Perspective project
-const scale = 400 / (400 + z * size); // Simple perspective
-return {
-x: cx + x * size * scale,
-y: cy + y * size * scale
-};
-});
-ctx.strokeStyle = CONFIG.colors.primary;
-ctx.lineWidth = 2;
-edges.forEach(e => {
-ctx.beginPath();
-ctx.moveTo(projected[e].x, projected[e].y);
-ctx.lineTo(projected[e].x, projected[e].y);
-ctx.stroke();
-});
-// Draw Vertices
-ctx.fillStyle = CONFIG.colors.bg;
-projected.forEach(p => {
-ctx.beginPath();
-ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
-ctx.fill();
-ctx.stroke();
-});
+  const cx = width / 2;
+  const cy = height / 2;
+  const size = 60;
+
+  const points = [
+    { x: -1, y: -1, z: -1 }, { x:  1, y: -1, z: -1 }, { x:  1, y:  1, z: -1 }, { x: -1, y:  1, z: -1 },
+    { x: -1, y: -1, z:  1 }, { x:  1, y: -1, z:  1 }, { x:  1, y:  1, z:  1 }, { x: -1, y:  1, z:  1 }
+  ];
+
+  // edge pairs by index
+  const edges = [
+    [0,1],[1,2],[2,3],[3,0], // back
+    [4,5],[5,6],[6,7],[7,4], // front
+    [0,4],[1,5],[2,6],[3,7]  // connectors
+  ];
+
+  const rotX = cubeRotation.x;
+  const rotY = cubeRotation.y;
+
+  const projected = points.map((p) => {
+    // rotate Y
+    let x = p.x * Math.cos(rotY) - p.z * Math.sin(rotY);
+    let z = p.x * Math.sin(rotY) + p.z * Math.cos(rotY);
+
+    // rotate X
+    let y = p.y * Math.cos(rotX) - z * Math.sin(rotX);
+    z = p.y * Math.sin(rotX) + z * Math.cos(rotX);
+
+    // perspective
+    const scale = 400 / (400 + z * size);
+    return {
+      x: cx + x * size * scale,
+      y: cy + y * size * scale
+    };
+  });
+
+  ctx.strokeStyle = CONFIG.colors.primary;
+  ctx.lineWidth = 2;
+
+  edges.forEach(([a, b]) => {
+    ctx.beginPath();
+    ctx.moveTo(projected[a].x, projected[a].y);
+    ctx.lineTo(projected[b].x, projected[b].y);
+    ctx.stroke();
+  });
+
+  // vertices
+  ctx.fillStyle = CONFIG.colors.bg;
+  projected.forEach((p) => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  });
 }
+
 function drawTouchReticle() {
-if (!touchPoint.active) return;
-touchPoint.radius += 2;
-if(touchPoint.radius > 40) touchPoint.radius = 20;
-ctx.strokeStyle = CONFIG.colors.secondary;
-ctx.lineWidth = 2;
-ctx.beginPath();
-ctx.arc(touchPoint.x, touchPoint.y, touchPoint.radius, 0, Math.PI*2);
-ctx.stroke();
-ctx.beginPath();
-ctx.arc(touchPoint.x, touchPoint.y, 5, 0, Math.PI*2);
-ctx.fillStyle = CONFIG.colors.secondary;
-ctx.fill();
-// Draw connecting line to cube
-ctx.beginPath();
-ctx.moveTo(touchPoint.x, touchPoint.y);
-ctx.lineTo(width/2, height/2);
-ctx.strokeStyle = 'rgba(255, 0, 85, 0.2)';
-ctx.stroke();
+  if (!touchPoint.active) return;
+
+  touchPoint.radius += 2;
+  if (touchPoint.radius > 40) touchPoint.radius = 20;
+
+  ctx.strokeStyle = CONFIG.colors.secondary;
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+  ctx.arc(touchPoint.x, touchPoint.y, touchPoint.radius, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(touchPoint.x, touchPoint.y, 5, 0, Math.PI * 2);
+  ctx.fillStyle = CONFIG.colors.secondary;
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(touchPoint.x, touchPoint.y);
+  ctx.lineTo(width / 2, height / 2);
+  ctx.strokeStyle = 'rgba(255, 0, 85, 0.2)';
+  ctx.stroke();
 }
-function render(time) {
-// Trail effect
-ctx.fillStyle = 'rgba(5, 5, 5, 0.2)';
-ctx.fillRect(0, 0, width, height);
-drawGrid(time);
-drawCube(); // Now interactive
-drawTouchReticle();
-// Scan Effect
-if (scanActive) {
-scanRadius += 15;
-ctx.beginPath();
-ctx.strokeStyle = CONFIG.colors.primary;
-ctx.lineWidth = 5;
-ctx.arc(width/2, height/2, scanRadius, 0, Math.PI * 2);
-ctx.stroke();
-if (scanRadius > Math.max(width, height)) scanActive = false;
+
+function render() {
+  ctx.fillStyle = 'rgba(5, 5, 5, 0.2)';
+  ctx.fillRect(0, 0, width, height);
+
+  drawGrid();
+  drawCube();
+  drawTouchReticle();
+
+  if (scanActive) {
+    scanRadius += 15;
+    ctx.beginPath();
+    ctx.strokeStyle = CONFIG.colors.primary;
+    ctx.lineWidth = 5;
+    ctx.arc(width / 2, height / 2, scanRadius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    if (scanRadius > Math.max(width, height)) scanActive = false;
+  }
+
+  if (!touchPoint.active) {
+    cubeRotation.y += 0.005;
+    cubeRotation.x += 0.002;
+  }
+
+  requestAnimationFrame(render);
 }
-// Auto rotate cube slightly if not touched
-if (!touchPoint.active) {
-cubeRotation.y += 0.005;
-cubeRotation.x += 0.002;
-}
-requestAnimationFrame(render);
-}
+
 // --- LOGGING ---
-function log(msg, type='info') {
-const logEl = document.getElementById('log-content');
-const entry = document.createElement('div');
-entry.className = type === 'error'? 'log-entry error' : 'log-entry';
-const ts = new Date().toTimeString().split(' ');
-entry.textContent = [${ts}] ${msg};
-logEl.prepend(entry);
+function log(msg, type = 'info') {
+  const logEl = document.getElementById('log-content');
+  const entry = document.createElement('div');
+  entry.className = (type === 'error') ? 'log-entry error' : 'log-entry';
+
+  const ts = new Date().toTimeString().split(' ')[0];
+  entry.textContent = `[${ts}] ${msg}`;
+
+  logEl.prepend(entry);
 }
+
 // --- SYSTEM COMMANDS ---
 function execCmd(cmd) {
-// Trigger audio unlock on button press too
-if (Audio.ctx && Audio.ctx.state === 'suspended') Audio.ctx.resume();
-switch(cmd) {
-case 'SCAN':
-log("SCANNING SECTOR...", "info");
-scanRadius = 0;
-scanActive = true;
-Audio.playTone('scan');
-break;
-case 'STATUS':
-log("SYSTEM ONLINE. DEFENSES ACTIVE.", "info");
-Audio.playTone('click');
-break;
-case 'OVERRIDE':
-log("ACCESS DENIED. SECURITY ALERT.", "error");
-Audio.playTone('error');
-break;
+  if (Audio.ctx && Audio.ctx.state === 'suspended') Audio.ctx.resume();
+
+  switch (cmd) {
+    case 'SCAN':
+      log('SCANNING SECTOR...', 'info');
+      scanRadius = 0;
+      scanActive = true;
+      Audio.playTone('scan');
+      break;
+    case 'STATUS':
+      log('SYSTEM ONLINE. DEFENSES ACTIVE.', 'info');
+      Audio.playTone('click');
+      break;
+    case 'OVERRIDE':
+      log('ACCESS DENIED. SECURITY ALERT.', 'error');
+      Audio.playTone('error');
+      break;
+    default:
+      log(`UNKNOWN COMMAND: ${cmd}`, 'error');
+      Audio.playTone('error');
+  }
 }
-}
-// Mobile Button Listeners (Touchstart for instant response)
-['btn-scan', 'btn-status', 'btn-override'].forEach(id => {
-const btn = document.getElementById(id);
-const cmd = id.split('-').toUpperCase();
-btn.addEventListener('touchstart', (e) => {
-e.preventDefault(); // Stop double-tap zoom
-btn.style.background = CONFIG.colors.primary;
-btn.style.color = 'black';
-execCmd(cmd);
+
+// Mobile Button Listeners
+['btn-scan', 'btn-status', 'btn-override'].forEach((id) => {
+  const btn = document.getElementById(id);
+  const cmd = id.replace('btn-', '').toUpperCase();
+
+  btn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    btn.style.background = CONFIG.colors.primary;
+    btn.style.color = 'black';
+    execCmd(cmd);
+  }, { passive: false });
+
+  btn.addEventListener('touchend', () => {
+    btn.style.background = '';
+    btn.style.color = '';
+  }, { passive: true });
+
+  // also allow click for desktop
+  btn.addEventListener('click', () => execCmd(cmd));
 });
-btn.addEventListener('touchend', (e) => {
-btn.style.background = '';
-btn.style.color = '';
-});
-});
+
 // Initialization
-document.getElementById('init-btn').addEventListener('click', startSystem);
-document.getElementById('init-btn').addEventListener('touchstart', startSystem);
+const initBtn = document.getElementById('init-btn');
+initBtn.addEventListener('click', startSystem);
+initBtn.addEventListener('touchstart', startSystem, { passive: false });
+
 function startSystem(e) {
-e.preventDefault(); // Prevent double firing on some devices
-document.getElementById('init-overlay').style.opacity = '0';
-setTimeout(() => {
-document.getElementById('init-overlay').style.display = 'none';
-document.getElementById('main-ui').style.opacity = '1';
-}, 1000);
-Audio.init();
-resize();
-render(0);
-log("SYSTEM INITIALIZED...");
-// Update Clock
-setInterval(() => {
-document.getElementById('clock').textContent = new Date().toTimeString().split(' ');
-updateTelemetry();
-}, 1000);
+  if (e) e.preventDefault();
+
+  document.getElementById('init-overlay').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('init-overlay').style.display = 'none';
+    document.getElementById('main-ui').style.opacity = '1';
+  }, 800);
+
+  Audio.init();
+  resize();
+  render();
+
+  log('SYSTEM INITIALIZED...');
+
+  setInterval(() => {
+    document.getElementById('clock').textContent = new Date().toTimeString().split(' ')[0];
+    updateTelemetry();
+  }, 1000);
+
+  updateTelemetry();
 }
+
 function updateTelemetry() {
-const tel = document.getElementById('telemetry-content');
-tel.innerHTML = <div class="data-row"><span>CORE TEMP</span><span>${Math.floor(40 + Math.random()*20)}°C</span></div> <div class="data-row"><span>CPU LOAD</span><span>${Math.floor(Math.random()*100)}%</span></div> <div class="data-row"><span>GRID LOCK</span><span>${touchPoint.active? 'LOCKED' : 'IDLE'}</span></div>;
+  const tel = document.getElementById('telemetry-content');
+  tel.innerHTML = `
+    <div class="data-row"><span>CORE TEMP</span><span>${Math.floor(40 + Math.random() * 20)}°C</span></div>
+    <div class="data-row"><span>CPU LOAD</span><span>${Math.floor(Math.random() * 100)}%</span></div>
+    <div class="data-row"><span>GRID LOCK</span><span>${touchPoint.active ? 'LOCKED' : 'IDLE'}</span></div>
+  `;
 }
 </script>
 </body>
