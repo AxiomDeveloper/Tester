@@ -1,50 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.css');
 
 :root {
-  --crt-scanline: rgba(18, 16, 16, 0.1);
-  --nvg-glow: rgba(0, 255, 0, 0.05);
+  --tac-green: #0f0;
+  --tac-dark: #051a05;
+  --tac-dim: rgba(0, 50, 0, 0.8);
 }
 
 body {
-  background-color: #000;
-  color: #0f0;
-  overflow: hidden;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--tac-green);
+  /* NVG Filter Effect */
+  filter: sepia(1) hue-rotate(70deg) saturate(2) contrast(1.1);
 }
 
-/* CRT Scanline Effect */
-.scanlines::before {
-  content: " ";
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background: linear-gradient(
-    to bottom,
-    var(--crt-scanline) 50%,
-    rgba(0, 0, 0, 0) 50%
-  );
-  background-size: 100% 4px;
-  z-index: 50;
+/* CRT Scanlines */
+.scanlines {
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 2px, 3px 100%;
   pointer-events: none;
+  position: absolute; inset: 0; z-index: 999;
 }
 
-/* Night Vision Green Filter */
-.nvg-mode {
-  filter: sepia(1) hue-rotate(70deg) saturate(3) contrast(1.2) brightness(0.8);
+.hud-panel {
+  background: var(--tac-dim);
+  border: 1px solid var(--tac-green);
+  backdrop-filter: blur(4px);
 }
 
-/* MapLibre Controls Override for Tactical Look */
-.maplibregl-ctrl-group {
-  background-color: rgba(0, 20, 0, 0.8)!important;
-  border: 1px solid #0f0!important;
+input {
+  background: #000;
+  border: 1px solid var(--tac-green);
+  color: var(--tac-green);
+  font-family: inherit;
+  text-transform: uppercase;
 }
-.maplibregl-ctrl-icon {
-  filter: invert(1) sepia(1) saturate(5) hue-rotate(90deg)!important;
+
+/* Touch targets for mobile */
+button {
+  min-height: 44px; min-width: 44px;
 }
