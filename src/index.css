@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --crt-scanline: rgba(18, 16, 16, 0.1);
+  --nvg-glow: rgba(0, 255, 0, 0.05);
+}
+
+body {
+  background-color: #000;
+  color: #0f0;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* CRT Scanline Effect */
+.scanlines::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--crt-scanline) 50%,
+    rgba(0, 0, 0, 0) 50%
+  );
+  background-size: 100% 4px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* Night Vision Green Filter */
+.nvg-mode {
+  filter: sepia(1) hue-rotate(70deg) saturate(3) contrast(1.2) brightness(0.8);
+}
+
+/* MapLibre Controls Override for Tactical Look */
+.maplibregl-ctrl-group {
+  background-color: rgba(0, 20, 0, 0.8)!important;
+  border: 1px solid #0f0!important;
+}
+.maplibregl-ctrl-icon {
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(90deg)!important;
+}
