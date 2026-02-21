@@ -5,295 +5,293 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Commute Journal</title>
+    <title>InfiltratorOS</title>
     <style>
         :root {
-            --bg-color: #f2f2f7;
-            --card-bg: #ffffff;
-            --text-main: #1c1c1e;
-            --text-muted: #8e8e93;
-            --accent: #007aff;
-            --danger: #ff3b30;
+            --bg: #0a0a0c;
+            --panel: #121216;
+            --cyan: #00f0ff;
+            --red: #ff003c;
+            --dim: #3a3a40;
+            --text: #c8c8cc;
+            --font: 'Courier New', Courier, monospace;
         }
 
-        /* Dark mode support for iPhone */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #000000;
-                --card-bg: #1c1c1e;
-                --text-main: #ffffff;
-                --text-muted: #98989d;
-                --accent: #0a84ff;
-            }
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden; /* Prevents whole-page bounce */
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        /* Scanline Overlay for realism */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 100;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
         }
 
         header {
-            padding: 20px 20px 15px;
-            background-color: var(--bg-color);
-            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-            position: sticky;
-            top: 0;
+            padding: 15px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--dim);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             z-index: 10;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        h1 {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .status {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #34c759; /* Green for offline/safe */
-            border-radius: 50%;
-        }
+        .bar-container { width: 100%; background: var(--bg); border: 1px solid var(--dim); height: 14px; position: relative; }
+        .bar-fill { height: 100%; width: 0%; transition: width 0.3s ease; }
+        .bar-fill.cyan { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+        .bar-fill.red { background: var(--red); box-shadow: 0 0 8px var(--red); }
+        .bar-labels { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 2px; color: var(--cyan); font-weight: bold;}
 
         main {
             flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            -webkit-overflow-scrolling: touch; /* Smooth iOS scrolling */
-        }
-
-        .note-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            animation: slideIn 0.3s ease-out;
-            position: relative;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .note-text {
-            font-size: 16px;
-            line-height: 1.5;
-            margin-bottom: 8px;
-            white-space: pre-wrap; /* Preserves line breaks */
-        }
-
-        .note-meta {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: var(--danger);
-            font-size: 14px;
-            padding: 4px 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .input-area {
-            padding: 15px 20px 25px; /* Extra bottom padding for iPhone swipe bar */
-            background-color: var(--card-bg);
-            border-top: 1px solid rgba(128, 128, 128, 0.2);
-            display: flex;
-            gap: 10px;
-        }
-
-        textarea {
-            flex: 1;
-            background-color: var(--bg-color);
-            border: none;
-            border-radius: 18px;
-            padding: 12px 16px;
-            font-size: 16px;
-            color: var(--text-main);
-            resize: none;
-            height: 45px;
-            max-height: 120px;
-            outline: none;
-        }
-
-        button.save-btn {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
-            transition: transform 0.1s;
+            padding: 20px;
         }
 
-        button.save-btn:active {
-            transform: scale(0.95);
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 400px;
         }
+
+        .node {
+            aspect-ratio: 1;
+            background: var(--panel);
+            border: 1px solid var(--dim);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--dim);
+            transition: all 0.2s;
+        }
+
+        .node:active { transform: scale(0.9); }
+        .node.safe { background: rgba(0, 240, 255, 0.1); border-color: var(--cyan); color: var(--cyan); box-shadow: inset 0 0 10px rgba(0,240,255,0.2); }
+        .node.danger { background: rgba(255, 0, 60, 0.1); border-color: var(--red); color: var(--red); box-shadow: inset 0 0 10px rgba(255,0,60,0.2); }
+
+        footer {
+            height: 35vh;
+            background: var(--panel);
+            border-top: 1px solid var(--dim);
+            padding: 10px;
+            overflow-y: hidden;
+            position: relative;
+        }
+
+        #terminal {
+            height: 100%;
+            overflow-y: auto;
+            font-size: 11px;
+            line-height: 1.4;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding-bottom: 20px;
+        }
+
+        .log-cyan { color: var(--cyan); }
+        .log-red { color: var(--red); }
+        .log-sys { color: #888; }
+
+        /* Hide scrollbar for aesthetics */
+        ::-webkit-scrollbar { width: 0px; }
+        
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10,10,12,0.9); z-index: 50;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            display: none; text-align: center;
+        }
+        
+        #overlay h1 { font-size: 32px; margin-bottom: 15px; }
+        .btn { background: transparent; color: var(--cyan); border: 1px solid var(--cyan); padding: 10px 20px; font-family: var(--font); cursor: pointer; text-transform: uppercase; font-weight: bold;}
+        .btn:active { background: var(--cyan); color: #000; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Ideas</h1>
-        <div class="status">
-            <div class="status-dot"></div>
-            <span>Locally Saved</span>
+        <div>
+            <div class="bar-labels"><span>Data Extraction</span><span id="data-val">0%</span></div>
+            <div class="bar-container"><div id="data-bar" class="bar-fill cyan"></div></div>
+        </div>
+        <div>
+            <div class="bar-labels"><span style="color:var(--red)">Active Trace</span><span id="trace-val" style="color:var(--red)">0%</span></div>
+            <div class="bar-container"><div id="trace-bar" class="bar-fill red"></div></div>
         </div>
     </header>
 
-    <main id="note-list">
-        </main>
+    <main>
+        <div id="grid"></div>
+    </main>
 
-    <div class="input-area">
-        <textarea id="note-input" placeholder="Jot down a thought..." rows="1" oninput="autoGrow(this)"></textarea>
-        <button class="save-btn" onclick="addNote()">↑</button>
+    <footer>
+        <div id="terminal"></div>
+    </footer>
+
+    <div id="overlay">
+        <h1 id="overlay-title">SYSTEM BREACHED</h1>
+        <button class="btn" onclick="Game.init()">Initialize Sequence</button>
     </div>
 
     <script>
-        // 1. App State & Storage Initialization
-        const STORAGE_KEY = 'commute_journal_notes';
-        let notes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-
-        // Elements
-        const listEl = document.getElementById('note-list');
-        const inputEl = document.getElementById('note-input');
-
-        // 2. Render Notes to the Screen
-        function renderNotes() {
-            listEl.innerHTML = '';
-            
-            if (notes.length === 0) {
-                listEl.innerHTML = `
-                    <div style="text-align:center; color: var(--text-muted); margin-top: 40px;">
-                        <p style="font-size: 40px; margin-bottom: 10px;">🚂</p>
-                        <p>Your commute journal is empty.</p>
-                        <p style="font-size: 14px; margin-top: 5px;">Everything you type here is saved instantly to your phone, signal or no signal.</p>
-                    </div>`;
-                return;
-            }
-
-            // Render from newest to oldest
-            notes.slice().reverse().forEach(note => {
-                const noteCard = document.createElement('div');
-                noteCard.className = 'note-card';
+        // --- MODULE: Terminal System ---
+        const Terminal = {
+            el: document.getElementById('terminal'),
+            jargon: [
+                "Bypassing subnet firewalls...", "Decrypting RSA-2048 keys...",
+                "Injecting payload into memory...", "Rerouting IP via proxy chain...",
+                "Scanning ports 1-65535...", "Analyzing packet headers...",
+                "Allocating virtual memory block...", "Buffer overflow successful."
+            ],
+            log(msg, type = 'sys') {
+                const line = document.createElement('div');
+                const timestamp = new Date().toISOString().substring(11, 19);
                 
-                const formattedDate = new Date(note.timestamp).toLocaleDateString('en-GB', { 
-                    weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' 
-                });
+                let cssClass = 'log-sys';
+                if(type === 'success') cssClass = 'log-cyan';
+                if(type === 'error') cssClass = 'log-red';
 
-                noteCard.innerHTML = `
-                    <div class="note-text">${escapeHTML(note.text)}</div>
-                    <div class="note-meta">
-                        <span>${formattedDate}</span>
-                        <button class="delete-btn" onclick="deleteNote(${note.id})">Delete</button>
-                    </div>
-                `;
-                listEl.appendChild(noteCard);
-            });
-        }
-
-        // 3. Add a New Note
-        function addNote() {
-            const text = inputEl.value.trim();
-            if (!text) return;
-
-            const newNote = {
-                id: Date.now(),
-                text: text,
-                timestamp: Date.now()
-            };
-
-            notes.push(newNote);
-            saveData();
-            
-            // Reset input
-            inputEl.value = '';
-            inputEl.style.height = '45px';
-            renderNotes();
-            
-            // Scroll to top to see new note
-            listEl.scrollTop = 0;
-        }
-
-        // 4. Delete a Note
-        function deleteNote(id) {
-            if(confirm("Delete this thought?")) {
-                notes = notes.filter(note => note.id !== id);
-                saveData();
-                renderNotes();
+                line.className = cssClass;
+                line.innerHTML = `[${timestamp}] ${msg}`;
+                this.el.appendChild(line);
+                
+                // Keep terminal from getting too long
+                if(this.el.children.length > 20) this.el.removeChild(this.el.firstChild);
+                this.el.scrollTop = this.el.scrollHeight;
+            },
+            randomLog() {
+                const text = this.jargon[Math.floor(Math.random() * this.jargon.length)];
+                this.log(text, 'sys');
             }
-        }
+        };
 
-        // 5. Save to Local Storage
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-        }
+        // --- MODULE: Game Logic ---
+        const Game = {
+            data: 0,
+            trace: 0,
+            nodes: [],
+            gridSize: 25, // 5x5 grid
+            isPlaying: false,
+            autoLogger: null,
 
-        // Utility: Auto-expanding textarea
-        function autoGrow(element) {
-            element.style.height = '45px'; // Reset
-            element.style.height = (element.scrollHeight) + 'px'; // Set to scroll height
-        }
+            elements: {
+                dataBar: document.getElementById('data-bar'),
+                dataVal: document.getElementById('data-val'),
+                traceBar: document.getElementById('trace-bar'),
+                traceVal: document.getElementById('trace-val'),
+                grid: document.getElementById('grid'),
+                overlay: document.getElementById('overlay'),
+                overlayTitle: document.getElementById('overlay-title')
+            },
 
-        // Utility: Prevent XSS attacks if you paste weird code
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    "'": '&#39;',
-                    '"': '&quot;'
-                }[tag] || tag)
-            );
-        }
+            init() {
+                this.data = 0;
+                this.trace = 0;
+                this.isPlaying = true;
+                this.updateUI();
+                this.elements.overlay.style.display = 'none';
+                Terminal.el.innerHTML = ''; // clear terminal
+                Terminal.log("INITIALIZING INFILTRATION PROTOCOL...", "sys");
+                
+                this.generateGrid();
+                
+                if(this.autoLogger) clearInterval(this.autoLogger);
+                this.autoLogger = setInterval(() => Terminal.randomLog(), 3500);
+            },
 
-        // Listen for Enter key (without Shift) to submit
-        inputEl.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                addNote();
+            generateGrid() {
+                this.elements.grid.innerHTML = '';
+                this.nodes = [];
+
+                for(let i=0; i < this.gridSize; i++) {
+                    const node = document.createElement('div');
+                    node.className = 'node';
+                    node.innerHTML = '0x' + Math.floor(Math.random()*16).toString(16).toUpperCase();
+                    
+                    // 30% chance of a node being a trap (ICE)
+                    const isTrap = Math.random() < 0.3;
+                    
+                    node.onclick = () => this.handleNodeClick(node, isTrap);
+                    this.elements.grid.appendChild(node);
+                    this.nodes.push({ el: node, isTrap: isTrap, clicked: false });
+                }
+            },
+
+            handleNodeClick(nodeEl, isTrap) {
+                if(!this.isPlaying) return;
+                if(nodeEl.classList.contains('safe') || nodeEl.classList.contains('danger')) return; // already clicked
+
+                if(isTrap) {
+                    nodeEl.classList.add('danger');
+                    nodeEl.innerHTML = 'ICE';
+                    this.trace += 20; // +20% trace
+                    Terminal.log("WARNING: ICE ENCOUNTERED. TRACE SPIKED.", "error");
+                } else {
+                    nodeEl.classList.add('safe');
+                    nodeEl.innerHTML = 'DAT';
+                    this.data += 10; // +10% data
+                    Terminal.log(`DATA NODE ACCESSED. EXTRACTING...`, "success");
+                }
+
+                this.updateUI();
+                this.checkWinLoss();
+            },
+
+            updateUI() {
+                this.elements.dataBar.style.width = `${this.data}%`;
+                this.elements.dataVal.innerText = `${this.data}%`;
+                this.elements.traceBar.style.width = `${this.trace}%`;
+                this.elements.traceVal.innerText = `${this.trace}%`;
+            },
+
+            checkWinLoss() {
+                if(this.trace >= 100) {
+                    this.endGame("CONNECTION TERMINATED", "error");
+                } else if (this.data >= 100) {
+                    this.endGame("MAINFRAME BREACHED", "success");
+                }
+            },
+
+            endGame(message, type) {
+                this.isPlaying = false;
+                clearInterval(this.autoLogger);
+                Terminal.log(message, type);
+                
+                setTimeout(() => {
+                    this.elements.overlay.style.display = 'flex';
+                    this.elements.overlayTitle.innerText = message;
+                    this.elements.overlayTitle.style.color = type === 'error' ? 'var(--red)' : 'var(--cyan)';
+                }, 1000);
             }
-        });
+        };
 
-        // Initial Render
-        renderNotes();
+        // Start system
+        window.onload = () => Game.init();
     </script>
 </body>
 </html>
