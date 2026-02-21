@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Commute Journal</title>
+    <style>
+        :root {
+            --bg-color: #f2f2f7;
+            --card-bg: #ffffff;
+            --text-main: #1c1c1e;
+            --text-muted: #8e8e93;
+            --accent: #007aff;
+            --danger: #ff3b30;
+        }
+
+        /* Dark mode support for iPhone */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --card-bg: #1c1c1e;
+                --text-main: #ffffff;
+                --text-muted: #98989d;
+                --accent: #0a84ff;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden; /* Prevents whole-page bounce */
+        }
+
+        header {
+            padding: 20px 20px 15px;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .status {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #34c759; /* Green for offline/safe */
+            border-radius: 50%;
+        }
+
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            -webkit-overflow-scrolling: touch; /* Smooth iOS scrolling */
+        }
+
+        .note-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            animation: slideIn 0.3s ease-out;
+            position: relative;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .note-text {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+            white-space: pre-wrap; /* Preserves line breaks */
+        }
+
+        .note-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .input-area {
+            padding: 15px 20px 25px; /* Extra bottom padding for iPhone swipe bar */
+            background-color: var(--card-bg);
+            border-top: 1px solid rgba(128, 128, 128, 0.2);
+            display: flex;
+            gap: 10px;
+        }
+
+        textarea {
+            flex: 1;
+            background-color: var(--bg-color);
+            border: none;
+            border-radius: 18px;
+            padding: 12px 16px;
+            font-size: 16px;
+            color: var(--text-main);
+            resize: none;
+            height: 45px;
+            max-height: 120px;
+            outline: none;
+        }
+
+        button.save-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
+            transition: transform 0.1s;
+        }
+
+        button.save-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Ideas</h1>
+        <div class="status">
+            <div class="status-dot"></div>
+            <span>Locally Saved</span>
+        </div>
+    </header>
+
+    <main id="note-list">
+        </main>
+
+    <div class="input-area">
+        <textarea id="note-input" placeholder="Jot down a thought..." rows="1" oninput="autoGrow(this)"></textarea>
+        <button class="save-btn" onclick="addNote()">↑</button>
+    </div>
+
+    <script>
+        // 1. App State & Storage Initialization
+        const STORAGE_KEY = 'commute_journal_notes';
+        let notes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+        // Elements
+        const listEl = document.getElementById('note-list');
+        const inputEl = document.getElementById('note-input');
+
+        // 2. Render Notes to the Screen
+        function renderNotes() {
+            listEl.innerHTML = '';
+            
+            if (notes.length === 0) {
+                listEl.innerHTML = `
+                    <div style="text-align:center; color: var(--text-muted); margin-top: 40px;">
+                        <p style="font-size: 40px; margin-bottom: 10px;">🚂</p>
+                        <p>Your commute journal is empty.</p>
+                        <p style="font-size: 14px; margin-top: 5px;">Everything you type here is saved instantly to your phone, signal or no signal.</p>
+                    </div>`;
+                return;
+            }
+
+            // Render from newest to oldest
+            notes.slice().reverse().forEach(note => {
+                const noteCard = document.createElement('div');
+                noteCard.className = 'note-card';
+                
+                const formattedDate = new Date(note.timestamp).toLocaleDateString('en-GB', { 
+                    weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' 
+                });
+
+                noteCard.innerHTML = `
+                    <div class="note-text">${escapeHTML(note.text)}</div>
+                    <div class="note-meta">
+                        <span>${formattedDate}</span>
+                        <button class="delete-btn" onclick="deleteNote(${note.id})">Delete</button>
+                    </div>
+                `;
+                listEl.appendChild(noteCard);
+            });
+        }
+
+        // 3. Add a New Note
+        function addNote() {
+            const text = inputEl.value.trim();
+            if (!text) return;
+
+            const newNote = {
+                id: Date.now(),
+                text: text,
+                timestamp: Date.now()
+            };
+
+            notes.push(newNote);
+            saveData();
+            
+            // Reset input
+            inputEl.value = '';
+            inputEl.style.height = '45px';
+            renderNotes();
+            
+            // Scroll to top to see new note
+            listEl.scrollTop = 0;
+        }
+
+        // 4. Delete a Note
+        function deleteNote(id) {
+            if(confirm("Delete this thought?")) {
+                notes = notes.filter(note => note.id !== id);
+                saveData();
+                renderNotes();
+            }
+        }
+
+        // 5. Save to Local Storage
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+        }
+
+        // Utility: Auto-expanding textarea
+        function autoGrow(element) {
+            element.style.height = '45px'; // Reset
+            element.style.height = (element.scrollHeight) + 'px'; // Set to scroll height
+        }
+
+        // Utility: Prevent XSS attacks if you paste weird code
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        // Listen for Enter key (without Shift) to submit
+        inputEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                addNote();
+            }
+        });
+
+        // Initial Render
+        renderNotes();
+    </script>
+</body>
+</html>
