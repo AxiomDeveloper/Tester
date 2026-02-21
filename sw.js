@@ -1,24 +1,24 @@
-const CACHE_NAME = 'mi5-cache-v1';
+const CACHE_NAME = 'facesnap-cache-v1';
 const ASSETS = [
-    '/',
-    '/index.html',
-    '/styles.css',
-    '/app.js',
-    '/terminal.js',
-    '/data.js',
-    '/manifest.json'
+  './',
+  './index.html',
+  './styles.css',
+  './app.js',
+  './manifest.json'
 ];
 
-// Install and cache everything
-self.addEventListener('install', (e) => {
-    e.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-    );
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
 });
 
-// Intercept network requests and serve from cache if offline
-self.addEventListener('fetch', (e) => {
-    e.respondWith(
-        caches.match(e.request).then((response) => response || fetch(e.request))
-    );
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+    )
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request)));
 });
