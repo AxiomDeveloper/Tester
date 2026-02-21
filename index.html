@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
@@ -10,21 +10,26 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="screen">
-        <header>
-            <div>MI5 DECRYPT TERMINAL v9.0</div>
-            <div id="sys-status">OFFLINE CACHE ACTIVE</div>
-        </header>
-        <div id="output"></div>
-        <div id="input-line">
-            <span class="prompt">root@mi5:/<span id="current-path"></span>$</span>
-            <input type="text" id="cmd-input" autocomplete="off" spellcheck="false" autofocus>
+    <header>
+        <div>MI5 DECRYPT TERMINAL v9.1</div>
+        <div class="sys-status">SECURE LOCAL NODE</div>
+    </header>
+
+    <div id="output"></div>
+
+    <div id="command-deck">
+        <div id="cmd-preview">
+            <span class="prompt">root@mi5:<span id="current-path">/</span>$</span> 
+            <span id="built-cmd"></span><span class="cursor">_</span>
         </div>
+        <div id="context-buttons">
+            </div>
     </div>
+
     <script type="module" src="app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(() => console.log('Secure offline node established.'));
+            navigator.serviceWorker.register('sw.js').then(() => console.log('SW Registered'));
         }
     </script>
 </body>
